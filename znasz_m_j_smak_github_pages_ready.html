@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Znasz mój smak? | Bistro Na Wałku x Carlsberg Polska</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Playfair Display oraz Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        craft: {
+                            dark: '#002615',
+                            card: '#003820',
+                            border: '#0B5334',
+                            amber: '#008B45',
+                            gold: '#34D399',
+                            cream: '#F8FAF9',
+                            muted: '#A7C4B5',
+                            brooklyn: '#0D9488',
+                            carlsbergGold: '#C5A059'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #001A0E;
+            background-image: radial-gradient(circle at 50% 0%, #004D2B 0%, #001A0E 75%);
+            color: #F8FAF9;
+        }
+        /* Ukrycie paska przewijania wewnątrz ramki telefonu */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Animacja wejścia ekranów */
+        .fade-slide-in {
+            animation: fadeSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-0 sm:p-6 antialiased selection:bg-craft-amber selection:text-white">
+
+    <!-- Nagłówek kontekstowy widoczny tylko na większych ekranach (Desktop Showcase) -->
+    <div class="hidden sm:flex items-center gap-3 mb-4 text-craft-muted text-xs tracking-wider uppercase">
+        <span class="inline-block w-2 h-2 rounded-full bg-craft-gold animate-pulse"></span>
+        <span>GitHub Pages Ready • Carlsberg Polska x Bistro Na Wałku</span>
+    </div>
+
+    <!-- Kontener Smartfona (Pełny ekran na mobile, ramka telefonu na desktopie) -->
+    <main id="app-frame" class="relative w-full sm:w-[400px] h-[100dvh] sm:h-[812px] bg-craft-dark sm:rounded-[44px] sm:border-[10px] sm:border-[#001F11] sm:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.9),0_0_40px_rgba(0,139,69,0.22)] flex flex-col overflow-hidden">
+        
+        <!-- Górny pasek statusu / Notch (tylko desktop) -->
+        <div class="hidden sm:flex justify-between items-center px-7 pt-3 pb-1 text-[11px] text-craft-muted font-medium select-none z-20">
+            <span>19:45</span>
+            <div class="w-24 h-5 bg-[#00140B] rounded-full flex items-center justify-end px-2">
+                <div class="w-2 h-2 rounded-full bg-[#064E3B]"></div>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <i data-lucide="wifi" class="w-3.5 h-3.5"></i>
+                <i data-lucide="battery-full" class="w-4 h-4"></i>
+            </div>
+        </div>
+
+        <!-- Nagłówek aplikacji (Logo Bistro & Partnera) -->
+        <header class="px-6 pt-4 pb-3 flex items-center justify-between border-b border-craft-border/70 bg-craft-dark/90 backdrop-blur-md z-10">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#008B45] to-[#004225] border border-emerald-400/30 flex items-center justify-center shadow-inner text-white font-serif font-bold text-lg">
+                    C
+                </div>
+                <div>
+                    <div class="text-xs font-bold tracking-wider uppercase text-craft-cream leading-tight">Bistro Na Wałku</div>
+                    <div class="text-[10px] text-craft-gold tracking-widest uppercase">Carlsberg Polska • HoReCa</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-1">
+                <button onclick="toggleQrModal(true)" title="Pokaż kod QR na stolik" class="p-2 rounded-full text-craft-gold hover:text-white hover:bg-craft-card transition-colors flex items-center gap-1 text-xs font-semibold">
+                    <i data-lucide="qr-code" class="w-4 h-4"></i>
+                    <span class="text-[11px]">QR</span>
+                </button>
+                <button onclick="resetGame()" title="Zacznij od nowa" class="p-2 rounded-full text-craft-muted hover:text-craft-cream hover:bg-craft-card transition-colors">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Główny obszar dynamicznej treści -->
+        <div id="screen-container" class="flex-1 overflow-y-auto no-scrollbar px-6 py-5 flex flex-col">
+            <!-- Zawartość renderowana przez JS -->
+        </div>
+
+        <!-- Dolny pasek informacyjny (Stopka) -->
+        <footer class="px-6 py-3 border-t border-craft-border/50 bg-craft-dark text-center">
+            <p class="text-[10px] text-craft-muted/80">
+                18+ | Pij odpowiedzialnie. Carlsberg Polska x Bistro Na Wałku.
+            </p>
+        </footer>
+
+        <!-- MODAL: Generator / Podgląd Kodu QR do testów i publikacji na GitHub Pages -->
+        <div id="qr-modal" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+            <div class="w-full bg-[#F8FAF9] text-[#002615] rounded-3xl p-6 shadow-2xl fade-slide-in relative">
+                <button onclick="toggleQrModal(false)" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/10 flex items-center justify-center text-emerald-950 hover:bg-black/20">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#008B45] mb-1">
+                    <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+                    <span>GitHub Pages • Generator QR</span>
+                </div>
+                <h3 class="font-serif text-2xl font-bold text-[#002615] mb-1">Zeskanuj telefonem</h3>
+                <p class="text-xs text-emerald-900/75 mb-4">
+                    Wklej swój adres z GitHub Pages, aby wygenerować działający kod QR na stolik w Bistro Na Wałku.
+                </p>
+
+                <!-- Kontener wygenerowanego kodu QR -->
+                <div class="bg-white p-4 rounded-2xl border-2 border-[#008B45]/20 shadow-sm flex flex-col items-center justify-center mb-4">
+                    <img id="qr-code-image" src="" alt="Kod QR do gry" class="w-44 h-44 rounded-lg object-contain mb-2" />
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-[#004225]">Bistro Na Wałku • Znasz mój smak?</span>
+                </div>
+
+                <!-- Pole na własny URL z GitHub Pages -->
+                <div class="mb-4">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-emerald-900/70 mb-1">
+                        Twój link z GitHub Pages (np. https://twojlogin.github.io/repo):
+                    </label>
+                    <div class="flex gap-1.5">
+                        <input id="qr-url-input" type="text" oninput="updateQrImage(this.value)" class="flex-1 px-3 py-2 rounded-xl bg-white border border-emerald-900/20 text-xs text-emerald-950 focus:outline-none focus:border-[#008B45]" />
+                    </div>
+                </div>
+
+                <button onclick="toggleQrModal(false)" class="w-full py-3 rounded-xl bg-[#004225] text-white font-semibold text-sm hover:bg-[#002B18] transition-colors">
+                    Zamknij okno
+                </button>
+            </div>
+        </div>
+
+        <!-- MODAL: Karta zamówienia dla kelnera -->
+        <div id="waiter-modal" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+            <div class="w-full bg-[#F8FAF9] text-[#002615] rounded-3xl p-6 shadow-2xl fade-slide-in relative">
+                <button onclick="toggleWaiterModal(false)" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/10 flex items-center justify-center text-emerald-950 hover:bg-black/20">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#008B45] mb-1">
+                    <i data-lucide="utensils" class="w-3.5 h-3.5"></i>
+                    <span>Karta Zamówienia • Stolik QR</span>
+                </div>
+                <h3 class="font-serif text-2xl font-bold text-[#002615] mb-4">Zestaw dla: <span id="modal-player-name" class="underline decoration-[#008B45]"></span></h3>
+                
+                <div class="space-y-3 bg-white p-4 rounded-2xl border border-emerald-900/15 shadow-sm mb-5">
+                    <div class="flex items-start gap-3 pb-3 border-b border-emerald-900/10">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-[#004225] flex items-center justify-center shrink-0">
+                            <i data-lucide="beer" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-[11px] uppercase tracking-wider text-emerald-800/60 font-semibold">Rekomendowane Piwo Premium</div>
+                            <div id="modal-beer-name" class="font-bold text-lg text-[#002615] leading-snug"></div>
+                            <div id="modal-beer-serve" class="text-xs text-emerald-900/75 mt-0.5"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 pt-1">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                            <i data-lucide="pizza" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-[11px] uppercase tracking-wider text-emerald-800/60 font-semibold">Idealny Foodpairing z pieca</div>
+                            <div id="modal-pizza-name" class="font-bold text-base text-[#002615] leading-snug"></div>
+                            <div id="modal-pizza-desc" class="text-xs text-emerald-900/75 mt-0.5"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center mb-4">
+                    <p class="text-xs text-[#004225] font-medium">
+                        Pokaż ten ekran kelnerowi przy składaniu zamówienia!
+                    </p>
+                </div>
+
+                <button onclick="toggleWaiterModal(false)" class="w-full py-3.5 rounded-xl bg-[#004225] text-white font-semibold text-sm hover:bg-[#002B18] transition-colors">
+                    Wróć do wyniku
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- WBUDOWANA BIBLIOTEKA IKON SVG ---
+        const svgIcons = {
+            'wifi': '<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
+            'battery-full': '<rect x="2" y="7" width="16" height="10" rx="2" ry="2"/><line x1="22" y1="11" x2="22" y2="13"/><line x1="6" y1="11" x2="6" y2="13"/><line x1="10" y1="11" x2="10" y2="13"/><line x1="14" y1="11" x2="14" y2="13"/>',
+            'rotate-ccw': '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+            'x': '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+            'utensils': '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+            'beer': '<path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 2 11 2s2 1.5 3 1.5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"/><path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/>',
+            'pizza': '<path d="M15 11h.01"/><path d="M11 15h.01"/><path d="M16 16h.01"/><path d="m2 16 20 6-6-20A20 20 0 0 0 2 16"/><path d="M5.71 17.11a17.04 17.04 0 0 1 11.4-11.4"/>',
+            'sparkles': '<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',
+            'heart': '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+            'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+            'user-check': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/>',
+            'alert-circle': '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+            'arrow-right': '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+            'arrow-left': '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+            'flame': '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+            'mountain': '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
+            'sun': '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+            'utensils-crossed': '<path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/>',
+            'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+            'feather': '<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>',
+            'music': '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+            'disc': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/>',
+            'smartphone': '<rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+            'receipt': '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>',
+            'user-plus': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',
+            'shield-check': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+            'ban': '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>',
+            'qr-code': '<rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/>'
+        };
+
+        function hydrateIcons() {
+            document.querySelectorAll('[data-lucide]').forEach(el => {
+                const name = el.getAttribute('data-lucide');
+                const cls = el.getAttribute('class') || 'w-4 h-4';
+                if (svgIcons[name]) {
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('class', cls);
+                    svg.setAttribute('viewBox', '0 0 24 24');
+                    svg.setAttribute('fill', 'none');
+                    svg.setAttribute('stroke', 'currentColor');
+                    svg.setAttribute('stroke-width', '2');
+                    svg.setAttribute('stroke-linecap', 'round');
+                    svg.setAttribute('stroke-linejoin', 'round');
+                    svg.innerHTML = svgIcons[name];
+                    el.replaceWith(svg);
+                }
+            });
+        }
+
+        // --- STAN APLIKACJI ---
+        const state = {
+            isAdult: false,
+            ageDenied: false,
+            step: 'ageGate', // 'ageGate' | 'welcome' | 'quiz' | 'verify' | 'result'
+            mode: 'duet',    // 'duet' | 'group'
+            targetName: '',
+            currentQuestion: 0,
+            scores: {
+                brooklyn: 0,
+                grimbergen: 0
+            },
+            answersHistory: [],
+            targetSelfChoice: null
+        };
+
+        const questions = [
+            {
+                id: 1,
+                category: "Test Odwagi w Karcie",
+                getTitle: (name) => `Co zrobi ${name}, gdy zobaczy w menu włoski składnik, którego nie potrafi wymówić?`,
+                options: [
+                    {
+                        text: "Zamawia w ciemno — im bardziej intrygująco brzmi, tym lepiej!",
+                        subtext: "Otwartość na nowe, wyraziste doznania",
+                        points: { brooklyn: 2, grimbergen: 0 },
+                        icon: "flame"
+                    },
+                    {
+                        text: "Dopytuje kelnera o szczegóły, żeby mieć pewność idealnego balansu",
+                        subtext: "Świadomy wybór i dbałość o harmonię",
+                        points: { brooklyn: 0, grimbergen: 2 },
+                        icon: "sparkles"
+                    }
+                ]
+            },
+            {
+                id: 2,
+                category: "Weekend w Okolicy",
+                getTitle: (name) => `Idealna niedziela w okolicach Szczawna-Zdroju dla ${name} to:`,
+                options: [
+                    {
+                        text: "Szybkie tempo: rower MTB w Górach Sowich albo eksploracja sztolni",
+                        subtext: "Energia, charakter i konkretne wrażenia",
+                        points: { brooklyn: 2, grimbergen: 0 },
+                        icon: "mountain"
+                    },
+                    {
+                        text: "Slow life: spacer po Parku Zdrojowym, kawa i długie celebrowanie chwili",
+                        subtext: "Spokój, estetyka i delektowanie się momentem",
+                        points: { brooklyn: 0, grimbergen: 2 },
+                        icon: "sun"
+                    }
+                ]
+            },
+            {
+                id: 3,
+                category: "Etykieta Neapolitańska",
+                getTitle: (name) => `Pizza z pieca ląduje na stole. Jaki jest pierwszy ruch ${name}?`,
+                options: [
+                    {
+                        text: "Od razu szuka oliwy chili i zjada wszystko — łącznie z przypalonymi rantami",
+                        subtext: "Lubi goryczkę, dymny aromat i wyrazisty finisz",
+                        points: { brooklyn: 2, grimbergen: 0 },
+                        icon: "utensils-crossed"
+                    },
+                    {
+                        text: "Delektuje się kremowym środkiem, a puszyste brzegi zostawia na deser lub oddaje innym",
+                        subtext: "Ceni aksamitność, delikatność i gładką strukturę",
+                        points: { brooklyn: 0, grimbergen: 2 },
+                        icon: "heart"
+                    }
+                ]
+            },
+            {
+                id: 4,
+                category: "Reakcja na Zmiany",
+                getTitle: (name) => `Gdy w ostatniej chwili zmieniają się plany na wieczór, ${name}:`,
+                options: [
+                    {
+                        text: "Mówi „super, jedziemy!” — spontaniczność to najlepsze paliwo",
+                        subtext: "Nowoczesny, miejski styl bycia",
+                        points: { brooklyn: 2, grimbergen: 0 },
+                        icon: "zap"
+                    },
+                    {
+                        text: "Woli dopracować detale, żeby każdy przy stole czuł się komfortowo",
+                        subtext: "Klasa, tradycja i ponadczasowy styl",
+                        points: { brooklyn: 0, grimbergen: 2 },
+                        icon: "feather"
+                    }
+                ]
+            },
+            {
+                id: 5,
+                category: "Klimat Wieczoru",
+                getTitle: (name) => `Jaka ścieżka dźwiękowa najlepiej opisuje nastrój ${name} przy kolacji?`,
+                options: [
+                    {
+                        text: "Energetyczny indie rock lub nowojorski funk w tętniącym życiem lokalu",
+                        subtext: "Wyrazisty rytm i bezkompromisowy charakter",
+                        points: { brooklyn: 2, grimbergen: 0 },
+                        icon: "music"
+                    },
+                    {
+                        text: "Ciepły jazz lub akustyczne brzmienia przy blasku świec i rozmowie",
+                        subtext: "Głębia, elegancja i subtelne nuty",
+                        points: { brooklyn: 0, grimbergen: 2 },
+                        icon: "disc"
+                    }
+                ]
+            }
+        ];
+
+        const profiles = {
+            brooklyn: {
+                key: 'brooklyn',
+                badge: 'PROFIL: MIEJSKI ODKRYWCA Z PAZUREM',
+                title: 'Brooklyn Lager',
+                tagline: 'Amerykańska ikona rzemiosła o bursztynowej barwie, wyrazistej chmielowej goryczce i karmelowej bazie.',
+                accentColor: 'text-teal-400',
+                badgeBg: 'bg-teal-500/15 border-teal-500/30 text-teal-300',
+                buttonGradient: 'from-teal-600 to-emerald-600',
+                serveNote: 'Serwowany w dedykowanej szklance typu Shaker • Temp. 6–8°C',
+                sensoryNotes: ['Chmielowy aromat', 'Nuta karmelu', 'Wyrazisty finisz'],
+                pizzaName: 'Pizza Diavola / Nduja & Spianata',
+                pizzaDesc: 'Pikantna kalabryjska nduja, salami spianata i fior di latte. Chmielowa goryczka Brooklyn Lagera genialnie kontruje ostrość i podbija smak pieczonego ciasta!',
+                altPizza: 'Lub wersja z truflą: Tartufo Crema'
+            },
+            grimbergen: {
+                key: 'grimbergen',
+                badge: 'PROFIL: ZBALANSOWANY HEDONISTA',
+                title: 'Grimbergen Blanche / Blonde',
+                tagline: 'Belgijskie piwo klasztorne o aksamitnej strukturze, orzeźwiających nutach cytrusów, kolendry i subtelnej przyprawowości.',
+                accentColor: 'text-amber-400',
+                badgeBg: 'bg-amber-500/15 border-amber-500/30 text-amber-300',
+                buttonGradient: 'from-amber-600 to-yellow-600',
+                serveNote: 'Serwowany w kielichu klasztornym na nóżce • Temp. 5–7°C',
+                sensoryNotes: ['Cytrusy i kolendra', 'Aksamitna piana', 'Klasztorny balans'],
+                pizzaName: 'Pizza Mortadella & Pistacje (Bianca)',
+                pizzaDesc: 'Włoska mortadela, krem pistacjowy, stracciatella i kruszone pistacje. Cytrusowo-korzenny profil Grimbergena idealnie oczyszcza podniebienie po kremowych dodatkach!',
+                altPizza: 'Lub klasyk: Margherita DOP z bazylią'
+            }
+        };
+
+        const container = document.getElementById('screen-container');
+
+        function render() {
+            container.innerHTML = '';
+            
+            if (state.step === 'ageGate') renderAgeGate();
+            else if (state.step === 'welcome') renderWelcome();
+            else if (state.step === 'quiz') renderQuiz();
+            else if (state.step === 'verify') renderVerify();
+            else if (state.step === 'result') renderResult();
+
+            hydrateIcons();
+        }
+
+        function renderAgeGate() {
+            const div = document.createElement('div');
+            div.className = 'flex-1 flex flex-col justify-center items-center text-center fade-slide-in py-4';
+            
+            if (state.ageDenied) {
+                div.innerHTML = `
+                    <div class="w-16 h-16 rounded-3xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center mb-5">
+                        <i data-lucide="ban" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="font-serif text-2xl font-bold text-craft-cream mb-3">
+                        Dostęp tylko dla pełnoletnich
+                    </h2>
+                    <p class="text-xs text-craft-muted leading-relaxed max-w-[280px] mb-6">
+                        Przepraszamy, zabawa dotyczy rekomendacji marek piwnych, dlatego przeznaczona jest wyłącznie dla osób powyżej 18. roku życia. Zapytaj obsługę Bistro Na Wałku o nasze rzemieślnicze lemoniady!
+                    </p>
+                    <button onclick="resetAgeGate()" class="px-5 py-2.5 rounded-xl bg-craft-card border border-craft-border text-xs text-craft-muted hover:text-craft-cream transition-colors">
+                        Pomyliłem się – wróć do weryfikacji
+                    </button>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="w-16 h-16 rounded-3xl bg-craft-amber/15 border border-craft-gold/30 text-craft-gold flex items-center justify-center mb-5 shadow-lg shadow-amber-900/20">
+                        <i data-lucide="shield-check" class="w-8 h-8"></i>
+                    </div>
+                    <div class="inline-block px-3 py-1 rounded-full bg-craft-card border border-craft-border text-[10px] font-bold uppercase tracking-widest text-craft-gold mb-3">
+                        Weryfikacja wieku
+                    </div>
+                    <h1 class="font-serif text-3xl font-bold text-craft-cream leading-tight mb-3">
+                        Czy masz ukończone 18 lat?
+                    </h1>
+                    <p class="text-xs text-craft-muted leading-relaxed max-w-[270px] mb-8">
+                        Zanim zaczniemy grę stolikową <strong>„Znasz mój smak?”</strong> w Bistro Na Wałku, potwierdź, że jesteś osobą pełnoletnią.
+                    </p>
+                    <div class="w-full space-y-3">
+                        <button onclick="confirmAge(true)" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-craft-amber to-craft-gold text-craft-dark font-bold text-sm shadow-lg shadow-amber-900/30 hover:brightness-105 active:scale-[0.99] transition-all">
+                            Tak, mam ukończone 18 lat
+                        </button>
+                        <button onclick="confirmAge(false)" class="w-full py-3.5 px-6 rounded-2xl bg-craft-card border border-craft-border text-craft-muted hover:text-craft-cream font-semibold text-xs transition-all">
+                            Nie, mam mniej niż 18 lat
+                        </button>
+                    </div>
+                `;
+            }
+            container.appendChild(div);
+        }
+
+        function renderWelcome() {
+            const div = document.createElement('div');
+            div.className = 'flex-1 flex flex-col justify-between fade-slide-in';
+            div.innerHTML = `
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-craft-amber/15 border border-craft-amber/30 text-craft-gold text-[11px] font-semibold mb-4">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                        <span>Gra stolikowa przed pierwszym kęsem</span>
+                    </div>
+                    
+                    <h1 class="font-serif text-3xl sm:text-[34px] font-bold text-craft-cream leading-[1.15] mb-3">
+                        Myślisz, że znasz osobę naprzeciwko?
+                    </h1>
+                    <p class="text-sm text-craft-muted leading-relaxed mb-6">
+                        Zanim pizza wyjedzie z pieca, sprawdźcie jak dobrze znacie swoje preferencje. Odpowiedz na 5 pytań <strong>za drugą osobę</strong> i odkryjcie jej idealny zestaw w Bistro Na Wałku.
+                    </p>
+
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-craft-muted mb-2">1. Wybierz skład przy stoliku</label>
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <button type="button" onclick="setMode('duet')" class="p-3.5 rounded-2xl border text-left transition-all ${state.mode === 'duet' ? 'bg-craft-amber/15 border-craft-gold text-craft-cream shadow-sm' : 'bg-craft-card border-craft-border text-craft-muted hover:border-craft-muted/50'}">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <i data-lucide="heart" class="w-5 h-5 ${state.mode === 'duet' ? 'text-craft-gold' : 'text-craft-muted'}"></i>
+                                ${state.mode === 'duet' ? '<span class="w-2 h-2 rounded-full bg-craft-gold"></span>' : ''}
+                            </div>
+                            <div class="font-bold text-sm">Duet (Para)</div>
+                            <div class="text-[11px] opacity-75">Typujesz partnera/kę</div>
+                        </button>
+
+                        <button type="button" onclick="setMode('group')" class="p-3.5 rounded-2xl border text-left transition-all ${state.mode === 'group' ? 'bg-craft-amber/15 border-craft-gold text-craft-cream shadow-sm' : 'bg-craft-card border-craft-border text-craft-muted hover:border-craft-muted/50'}">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <i data-lucide="users" class="w-5 h-5 ${state.mode === 'group' ? 'text-craft-gold' : 'text-craft-muted'}"></i>
+                                ${state.mode === 'group' ? '<span class="w-2 h-2 rounded-full bg-craft-gold"></span>' : ''}
+                            </div>
+                            <div class="font-bold text-sm">Ekipa (3+ osób)</div>
+                            <div class="text-[11px] opacity-75">Typujecie jedną osobę</div>
+                        </button>
+                    </div>
+
+                    <label for="player-name-input" class="block text-xs font-semibold uppercase tracking-wider text-craft-muted mb-2">
+                        2. Kogo teraz prześwietlamy? (Wpisz imię)
+                    </label>
+                    <div class="relative mb-2">
+                        <input 
+                            type="text" 
+                            id="player-name-input" 
+                            value="${escapeHtml(state.targetName)}"
+                            oninput="updateName(this.value)"
+                            onkeypress="if(event.key === 'Enter') startGame()"
+                            placeholder="np. Kasia, Tomek, Michał..." 
+                            maxlength="20"
+                            class="w-full px-4 py-3.5 rounded-2xl bg-craft-card border border-craft-border text-craft-cream placeholder-craft-muted/40 focus:outline-none focus:border-craft-gold transition-colors text-base font-medium"
+                        >
+                        <div class="absolute right-3.5 top-1/2 -translate-y-1/2 text-craft-muted/50">
+                            <i data-lucide="user-check" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <p id="name-error" class="hidden text-xs text-red-400 mt-1 flex items-center gap-1">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                        <span>Wpisz imię osoby przy stoliku, aby rozpocząć!</span>
+                    </p>
+                </div>
+
+                <div class="pt-4">
+                    <button onclick="startGame()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-craft-amber to-craft-gold text-craft-dark font-bold text-base shadow-lg shadow-amber-900/30 hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                        <span>Rozpocznij test smaku</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function renderQuiz() {
+            const q = questions[state.currentQuestion];
+            const progress = ((state.currentQuestion + 1) / questions.length) * 100;
+            const safeName = escapeHtml(state.targetName);
+
+            const div = document.createElement('div');
+            div.className = 'flex-1 flex flex-col justify-between fade-slide-in';
+            div.innerHTML = `
+                <div>
+                    <div class="flex items-center justify-between text-xs text-craft-muted mb-2">
+                        <span class="font-semibold text-craft-gold uppercase tracking-wider">${q.category}</span>
+                        <span>Pytanie ${state.currentQuestion + 1} z ${questions.length}</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-craft-card rounded-full overflow-hidden mb-6">
+                        <div class="h-full bg-gradient-to-r from-craft-amber to-craft-gold transition-all duration-300" style="width: ${progress}%"></div>
+                    </div>
+
+                    <div class="inline-block px-2.5 py-1 rounded-lg bg-craft-card border border-craft-border text-[11px] text-craft-muted mb-3">
+                        Odpowiada ${state.mode === 'duet' ? 'partner/ka' : 'ekipa'} za: <strong class="text-craft-cream">${safeName}</strong>
+                    </div>
+
+                    <h2 class="font-serif text-2xl font-bold text-craft-cream leading-snug mb-6">
+                        ${q.getTitle(safeName)}
+                    </h2>
+
+                    <div class="space-y-3.5">
+                        ${q.options.map((opt, idx) => `
+                            <button onclick="selectAnswer(${idx})" class="w-full p-4 rounded-2xl bg-craft-card border border-craft-border hover:border-craft-gold hover:bg-[#262320] text-left transition-all group active:scale-[0.99]">
+                                <div class="flex items-start gap-3.5">
+                                    <div class="w-10 h-10 rounded-xl bg-craft-dark border border-craft-border group-hover:border-craft-gold/50 group-hover:text-craft-gold text-craft-muted flex items-center justify-center shrink-0 transition-colors mt-0.5">
+                                        <i data-lucide="${opt.icon}" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-sm text-craft-cream group-hover:text-white leading-snug mb-1">
+                                            ${opt.text}
+                                        </div>
+                                        <div class="text-xs text-craft-muted">
+                                            ${opt.subtext}
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-center justify-between text-xs text-craft-muted">
+                    ${state.currentQuestion > 0 ? `
+                        <button onclick="prevQuestion()" class="flex items-center gap-1 hover:text-craft-cream py-2">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Poprzednie</span>
+                        </button>
+                    ` : '<span></span>'}
+                    <span class="italic opacity-70">Nie podpowiadajcie!</span>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function renderVerify() {
+            const safeName = escapeHtml(state.targetName);
+            const div = document.createElement('div');
+            div.className = 'flex-1 flex flex-col justify-between fade-slide-in';
+            div.innerHTML = `
+                <div class="text-center pt-2">
+                    <div class="w-16 h-16 rounded-3xl bg-craft-amber/15 border border-craft-gold/30 text-craft-gold flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-900/20">
+                        <i data-lucide="smartphone" class="w-8 h-8"></i>
+                    </div>
+                    
+                    <div class="text-xs font-bold uppercase tracking-widest text-craft-gold mb-2">
+                        Chwila prawdy!
+                    </div>
+                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-craft-cream leading-tight mb-3">
+                        Przekaż telefon osobie: <span class="text-craft-gold underline decoration-craft-amber/50">${safeName}</span>
+                    </h2>
+                    <p class="text-xs text-craft-muted leading-relaxed max-w-[290px] mx-auto mb-6">
+                        ${state.mode === 'duet' ? 'Twój partner/ka właśnie wytypował(a) Twój profil!' : 'Twoja ekipa właśnie wytypowała Twój profil!'} Zanim odkryjesz wynik, kliknij na co masz <strong>teraz</strong> największą ochotę:
+                    </p>
+
+                    <div class="space-y-3 text-left">
+                        <button onclick="finishVerification('brooklyn')" class="w-full p-4 rounded-2xl bg-craft-card border border-craft-border hover:border-teal-400 transition-all flex items-center gap-3.5 group">
+                            <div class="w-11 h-11 rounded-xl bg-teal-500/15 text-teal-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="flame" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm text-craft-cream group-hover:text-teal-300">Coś wyrazistego, rzemieślniczego i z charakterem</div>
+                                <div class="text-xs text-craft-muted">Chmielowy pazur, konkretny aromat</div>
+                            </div>
+                        </button>
+
+                        <button onclick="finishVerification('grimbergen')" class="w-full p-4 rounded-2xl bg-craft-card border border-craft-border hover:border-amber-400 transition-all flex items-center gap-3.5 group">
+                            <div class="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0">
+                                <i data-lucide="sparkles" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sm text-craft-cream group-hover:text-amber-300">Coś aksamitnego, aromatycznego i zbalansowanego</div>
+                                <div class="text-xs text-craft-muted">Subtelne nuty cytrusowo-korzenne</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center pt-4">
+                    <p class="text-[11px] text-craft-muted/80">
+                        Sprawdzimy, w ilu procentach dobrze Cię znają!
+                    </p>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function renderResult() {
+            const safeName = escapeHtml(state.targetName);
+            const guessedProfileKey = state.scores.brooklyn >= state.scores.grimbergen ? 'brooklyn' : 'grimbergen';
+            const profile = profiles[guessedProfileKey];
+            
+            const isExactMatch = state.targetSelfChoice === guessedProfileKey;
+            const matchPercentage = isExactMatch ? 100 : 80;
+            const matchText = isExactMatch 
+                ? `Pełna telepatia! ${state.mode === 'duet' ? 'Znacie się' : 'Ekipa zna Cię'} w 100%!`
+                : `Zgodność 80%! Znajomi odkryli w Tobie ukrytą nutę!`;
+
+            document.getElementById('modal-player-name').textContent = state.targetName;
+            document.getElementById('modal-beer-name').textContent = profile.title;
+            document.getElementById('modal-beer-serve').textContent = profile.serveNote;
+            document.getElementById('modal-pizza-name').textContent = profile.pizzaName;
+            document.getElementById('modal-pizza-desc').textContent = profile.pizzaDesc;
+
+            const div = document.createElement('div');
+            div.className = 'flex-1 flex flex-col justify-between fade-slide-in space-y-4';
+            div.innerHTML = `
+                <div class="space-y-4">
+                    <div class="p-3 rounded-2xl bg-craft-card border border-craft-border flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-craft-gold/20 text-craft-gold font-bold text-xs flex items-center justify-center shrink-0">
+                                ${matchPercentage}%
+                            </div>
+                            <div class="text-xs font-medium text-craft-cream leading-snug">
+                                ${matchText}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 rounded-3xl bg-gradient-to-b from-[#004728] to-craft-card border border-craft-border relative overflow-hidden shadow-xl">
+                        <div class="inline-block px-2.5 py-1 rounded-full border text-[10px] font-bold tracking-wider uppercase mb-2.5 ${profile.badgeBg}">
+                            ${profile.badge}
+                        </div>
+                        
+                        <div class="text-xs text-craft-muted mb-0.5">Twój idealny wybór dla <strong class="text-craft-cream">${safeName}</strong>:</div>
+                        <h2 class="font-serif text-3xl font-bold text-white mb-2">
+                            ${profile.title}
+                        </h2>
+                        <p class="text-xs text-craft-muted leading-relaxed mb-4">
+                            ${profile.tagline}
+                        </p>
+
+                        <div class="flex flex-wrap gap-1.5 mb-3">
+                            ${profile.sensoryNotes.map(note => `
+                                <span class="px-2.5 py-1 rounded-lg bg-craft-dark/80 border border-craft-border text-[11px] text-craft-cream font-medium">
+                                    ${note}
+                                </span>
+                            `).join('')}
+                        </div>
+
+                        <div class="text-[11px] ${profile.accentColor} font-medium flex items-center gap-1.5 pt-2 border-t border-craft-border/50">
+                            <i data-lucide="beer" class="w-3.5 h-3.5"></i>
+                            <span>${profile.serveNote}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-[#00311C] border border-craft-gold/30">
+                        <div class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-craft-gold mb-1.5">
+                            <i data-lucide="pizza" class="w-4 h-4"></i>
+                            <span>Idealny pairing z pieca Bistro Na Wałku</span>
+                        </div>
+                        <div class="font-bold text-base text-craft-cream mb-1">
+                            ${profile.pizzaName}
+                        </div>
+                        <p class="text-xs text-craft-muted leading-relaxed mb-2">
+                            ${profile.pizzaDesc}
+                        </p>
+                        <div class="text-[11px] text-craft-gold/80 italic">
+                            ${profile.altPizza}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 space-y-2.5">
+                    <button onclick="toggleWaiterModal(true)" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r ${profile.buttonGradient} text-white font-bold text-sm shadow-lg hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="receipt" class="w-4 h-4"></i>
+                        <span>Pokaż zestaw kelnerowi</span>
+                    </button>
+
+                    <button onclick="playNextPerson()" class="w-full py-3 px-5 rounded-2xl bg-craft-card border border-craft-border text-craft-cream hover:bg-[#004728] font-semibold text-xs transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="user-plus" class="w-4 h-4 text-craft-gold"></i>
+                        <span>Teraz kolejna osoba przy stoliku!</span>
+                    </button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function confirmAge(isAdult) {
+            if (isAdult) {
+                state.isAdult = true;
+                state.ageDenied = false;
+                state.step = 'welcome';
+            } else {
+                state.isAdult = false;
+                state.ageDenied = true;
+            }
+            render();
+        }
+
+        function resetAgeGate() {
+            state.ageDenied = false;
+            render();
+        }
+
+        function setMode(mode) {
+            state.mode = mode;
+            render();
+        }
+
+        function updateName(val) {
+            state.targetName = val;
+            const err = document.getElementById('name-error');
+            if (err && val.trim().length > 0) {
+                err.classList.add('hidden');
+            }
+        }
+
+        function startGame() {
+            if (!state.targetName || state.targetName.trim() === '') {
+                const err = document.getElementById('name-error');
+                if (err) err.classList.remove('hidden');
+                const input = document.getElementById('player-name-input');
+                if (input) input.focus();
+                return;
+            }
+            state.targetName = state.targetName.trim();
+            state.step = 'quiz';
+            state.currentQuestion = 0;
+            state.scores = { brooklyn: 0, grimbergen: 0 };
+            state.answersHistory = [];
+            render();
+        }
+
+        function selectAnswer(optionIndex) {
+            const q = questions[state.currentQuestion];
+            const chosen = q.options[optionIndex];
+            
+            state.scores.brooklyn += chosen.points.brooklyn;
+            state.scores.grimbergen += chosen.points.grimbergen;
+            state.answersHistory.push(chosen.points);
+
+            if (state.currentQuestion < questions.length - 1) {
+                state.currentQuestion++;
+                render();
+            } else {
+                state.step = 'verify';
+                render();
+            }
+        }
+
+        function prevQuestion() {
+            if (state.currentQuestion > 0) {
+                const lastPoints = state.answersHistory.pop();
+                if (lastPoints) {
+                    state.scores.brooklyn -= lastPoints.brooklyn;
+                    state.scores.grimbergen -= lastPoints.grimbergen;
+                }
+                state.currentQuestion--;
+                render();
+            }
+        }
+
+        function finishVerification(selfChoice) {
+            state.targetSelfChoice = selfChoice;
+            state.step = 'result';
+            render();
+        }
+
+        function toggleWaiterModal(show) {
+            const modal = document.getElementById('waiter-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+                hydrateIcons();
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function toggleQrModal(show) {
+            const modal = document.getElementById('qr-modal');
+            if (show) {
+                const input = document.getElementById('qr-url-input');
+                // Jeśli jesteśmy na GitHub Pages, automatycznie pobierze prawidłowy link, w przeciwnym razie domyślny URL
+                const currentUrl = (window.location.href && window.location.href.startsWith('http')) 
+                    ? window.location.href 
+                    : 'https://twojlogin.github.io/nazwa-repo/';
+                if (!input.value) {
+                    input.value = currentUrl;
+                }
+                updateQrImage(input.value);
+                modal.classList.remove('hidden');
+                hydrateIcons();
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function updateQrImage(url) {
+            const img = document.getElementById('qr-code-image');
+            const targetUrl = (url && url.trim().length > 0) ? url.trim() : 'https://www.carlsbergpolska.pl/';
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=004225&bgcolor=FFFFFF&data=${encodeURIComponent(targetUrl)}`;
+        }
+
+        function playNextPerson() {
+            state.targetName = '';
+            state.step = 'welcome';
+            state.currentQuestion = 0;
+            state.scores = { brooklyn: 0, grimbergen: 0 };
+            state.answersHistory = [];
+            state.targetSelfChoice = null;
+            render();
+        }
+
+        function resetGame() {
+            state.mode = 'duet';
+            state.isAdult = false;
+            state.ageDenied = false;
+            state.targetName = '';
+            state.step = 'ageGate';
+            state.currentQuestion = 0;
+            state.scores = { brooklyn: 0, grimbergen: 0 };
+            state.answersHistory = [];
+            state.targetSelfChoice = null;
+            render();
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
+    </script>
+</body>
+</html>
